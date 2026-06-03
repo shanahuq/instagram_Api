@@ -10,15 +10,17 @@ class InstagramProfileBloc extends Bloc<InstagramProfileEvent, InstagramProfileS
   InstagramProfileApi instagramProfileApi = InstagramProfileApi();
   late InstagramProfileModel instagramProfileModel;
   InstagramProfileBloc() : super(InstagramProfileInitial()) {
-    on<InstagramProfileEvent>((event, emit) async  {
+    on<FetchInstagramProfileEvent>((event, emit) async  {
+        print("BLOC EVENT RECEIVED");
       emit(InstagramProfileBlocLoading());
       try {
 final instagram = await instagramProfileApi.getinstagram();
-emit(InstagramProfileBlocLoaded());
-      } catch(e) {
-        print("ERROR: $e");
-        emit(InstagramProfileBlocError());
-      }
+  print("API SUCCESS");
+emit(InstagramProfileBlocLoaded(instagram));
+      } catch (e) {
+          print("API ERROR: $e");
+  emit(InstagramProfileBlocError(e.toString()));
+}
       // TODO: implement event handler
     });
   }

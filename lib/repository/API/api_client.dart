@@ -67,7 +67,7 @@ class ApiClient {
               'Accept': 'application/json',
             'content-Type': 'application/json',
             'x-rapidapi-host': 'instagram-best-experience.p.rapidapi.com',
-            'x-Rapidapi-key': '5b1337101cmshc566574615eee67p1c0c8cjsnc9ff4636f1ea'
+            'x-Rapidapi-key': 'f6d974cf72msh2a38ce245a6e1dep1c3733jsn271f6f36b8b5'
           },
           
         );
