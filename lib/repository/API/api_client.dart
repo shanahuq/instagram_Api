@@ -11,7 +11,7 @@ class ApiClient {
     Map<String, String> headerParams = {};
     Response response;
 
-    String url = path;
+    String url = "https://instagram-best-experience.p.rapidapi.com/$path";
     print(url);
 
     // final SharedPreferences prefs = await SharedPreferences.getInstance();

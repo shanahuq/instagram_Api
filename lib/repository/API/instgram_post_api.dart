@@ -1,24 +1,22 @@
-import 'dart:convert';
-
 import 'package:http/http.dart';
-import 'package:instagram_api/repository/Models/instagram_model.dart';
+import 'dart:convert';
+import 'package:instagram_api/repository/API/Api_client.dart';
+import 'package:instagram_api/repository/API/Api_exception.dart';
+import 'package:instagram_api/repository/Models/instagram_post_models.dart';
 
-import 'Api_client.dart';
-import 'Api_exception.dart';
-
-class InstagramProfileApi {
+class InstagramPostApi {
   ApiClient apiClient = ApiClient();
 
-  Future<InstagramProfileModel> getinstagram() async {
+  Future<InstagramPostModels> getpostinstagram() async {
     String trendingPath =
-        "profile?username=nike";
+        "post?shortcode=B9KI0D2HHe7";
     Response response = await apiClient.invokeAPI(trendingPath, "GET", null);
     print(response.body);
      if (response.statusCode == 200) {
     final Map<String, dynamic> jsonData =
         jsonDecode(response.body);
 
-    return InstagramProfileModel.fromJson(jsonData);
+    return InstagramPostModels.fromJson(jsonData);
   } else {
       final errorBody = jsonDecode(response.body);
       throw ApiException(
