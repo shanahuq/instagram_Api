@@ -13,8 +13,8 @@ late InstagramPostModels instagramPostModels;
     on<FetchInstagramPostEvent>((event, emit) async {
       emit (InstagramPostBlocLoading());
       try {
-        final instagram = await instagramPostApi.getpostinstagram();
-        emit (InstagramPostBlocLoaded(instagram));
+        final posts = await instagramPostApi.getpostinstagram();
+        emit (InstagramPostBlocLoaded([posts]));
       } catch (e) {
         print ("API ERROR: $e");
         emit(InstagramPostBlocError());

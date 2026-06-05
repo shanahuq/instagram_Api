@@ -3,10 +3,18 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:instagram_api/UI/instagram_profile_ui.dart';
 import 'package:instagram_api/bloc/bloc/instagram_profile_bloc.dart';
+import 'package:instagram_api/bloc/instagram_post/bloc/instagram_post_bloc.dart';
 
 void main() {
-  runApp(BlocProvider(create: (_) => InstagramProfileBloc(),
-    child:const MyApp()));
+  runApp(
+    MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => InstagramProfileBloc()),
+        BlocProvider(create: (context) => InstagramPostBloc()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -15,7 +23,7 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return  ScreenUtilInit(
+    return ScreenUtilInit(
       designSize: Size(414, 896),
       minTextAdapt: true,
       splitScreenMode: true,
@@ -24,9 +32,8 @@ class MyApp extends StatelessWidget {
         title: 'Flutter Demo',
         theme: ThemeData(),
 
-        home: const InstagramProfileUi (),
+        home: const InstagramProfileUi(),
       ),
     );
   }
 }
-

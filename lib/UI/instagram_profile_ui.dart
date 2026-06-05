@@ -315,78 +315,121 @@ class _InstagramProfileUiState extends State<InstagramProfileUi> {
                   ),
                   SizedBox(height: 30.h),
 
-                  Expanded(
-                    child: DefaultTabController(
-                      length: 4,
-                      child: Column(
-                        children: [
-                          TabBar(
-                            indicatorColor: Colors.white,
-                            dividerColor: Colors.transparent,
-                            tabs: [
-                              Tab(
-                                icon: Icon(Icons.grid_on, color: Colors.white),
-                              ),
-                              Tab(
-                                icon: Icon(
-                                  Icons.video_collection_outlined,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              Tab(icon: Icon(Icons.sync, color: Colors.white)),
-                              Tab(
-                                icon: Icon(
-                                  Icons.person_pin_outlined,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
-                          ),
-                          Expanded(
-                            child: TabBarView(
+                  BlocBuilder<InstagramPostBloc, InstagramPostState>(
+                    builder: (context, state) {
+                      if (state is InstagramPostBlocLoading) {
+                        return CircularProgressIndicator();
+                      }
+                      if (state is InstagramPostBlocError) {
+                        return Text(
+                          'Failed to lead post',
+                          style: TextStyle(color: const Color.fromARGB(255, 223, 9, 9)),
+                        );
+                      }
+                      if (state is InstagramPostBlocLoaded) {
+                        print("POST LOADED");
+                        print(state.posts.length);
+                        print(state.posts.first.imageVersions2?.candidates?.first.url);
+                        final posts = state.posts;
+                        return Expanded(
+                          child: DefaultTabController(
+                            length: 4,
+                            child: Column(
                               children: [
-                                GridView.builder(
-                                  itemCount: 12,
-                                  gridDelegate:
-                                      SliverGridDelegateWithFixedCrossAxisCount(
-                                        crossAxisCount: 3,
-                                        crossAxisSpacing: 2,
-                                        mainAxisSpacing: 2,
-                                      ),
-                                  itemBuilder: (context, index) {
-                                    return Container(
-                                      color: Colors.grey.shade800,
-                                      child: Icon(
-                                        Icons.image,
+                                TabBar(
+                                  indicatorColor: Colors.white,
+                                  dividerColor: Colors.transparent,
+                                  tabs: [
+                                    Tab(
+                                      icon: Icon(
+                                        Icons.grid_on,
                                         color: Colors.white,
                                       ),
-                                    );
-                                  },
+                                    ),
+                                    Tab(
+                                      icon: Icon(
+                                        Icons.video_collection_outlined,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    Tab(
+                                      icon: Icon(
+                                        Icons.sync,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    Tab(
+                                      icon: Icon(
+                                        Icons.person_pin_outlined,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                Center(
-                                  child: Text(
-                                    'No Reels',
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                ),
-                                Center(
-                                  child: Text(
-                                    'No Shared Reels',
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                ),
-                                Center(
-                                  child: Text(
-                                    'No tagged Post',
-                                    style: TextStyle(color: Colors.white),
+                                Expanded(
+                                  child: TabBarView(
+                                    children: [
+                                      GridView.builder(
+                                        itemCount: posts.length,
+                                        gridDelegate:
+                                            SliverGridDelegateWithFixedCrossAxisCount(
+                                              crossAxisCount: 3,
+                                              crossAxisSpacing: 2,
+                                              mainAxisSpacing: 2,
+                                            ),
+                                        itemBuilder: (context, index) {
+                                          final post = posts[index];
+                                          return Image.network(
+                                            post
+                                                    .imageVersions2
+                                                    ?.candidates
+                                                    ?.first
+                                                    .url ??
+                                                '',
+                                            fit: BoxFit.cover,
+                                            
+                                            errorBuilder: (
+                                              context,
+                                              error,
+                                              stackTrace,
+                                            ) {
+                                              print("IMAGE ERROR: $error");
+                                              return Container(
+                                                color: Colors.red,
+                                                child: const Icon(Icons.error),
+                                              );
+                                            },
+                                          );
+                                        },
+                                      ),
+                                      Center(
+                                        child: Text(
+                                          'No Reels',
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                      ),
+                                      Center(
+                                        child: Text(
+                                          'No Shared Reels',
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                      ),
+                                      Center(
+                                        child: Text(
+                                          'No tagged Post',
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                        ],
-                      ),
-                    ),
+                        );
+                      }
+                      return const SizedBox();
+                    },
                   ),
                 ],
               ),
