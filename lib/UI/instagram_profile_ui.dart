@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:instagram_api/UI/post.dart';
 import 'package:instagram_api/bloc/bloc/instagram_profile_bloc.dart';
 import 'package:instagram_api/bloc/instagram_post/bloc/instagram_post_bloc.dart';
+import 'package:video_player/video_player.dart';
 
 class InstagramProfileUi extends StatefulWidget {
   const InstagramProfileUi({super.key});
@@ -39,11 +41,7 @@ class _InstagramProfileUiState extends State<InstagramProfileUi> {
         if (state is InstagramProfileBlocLoaded) {
           final profile = state.profile;
           print(profile.profilePicUrl);
-          final imageUrl =
-              'https://corsproxy.io/?${Uri.encodeComponent(profile.profilePicUrl!)}';
-          // setState(() {
-          //     profileName = profile.username!;
-          // });
+
           return Scaffold(
             backgroundColor: Colors.black,
             appBar: AppBar(
@@ -55,7 +53,7 @@ class _InstagramProfileUiState extends State<InstagramProfileUi> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
-                      profile.username!,
+                      profile.username! ?? "",
                       style: TextStyle(
                         fontWeight: FontWeight.w500,
                         fontSize: 18.sp,
@@ -323,14 +321,27 @@ class _InstagramProfileUiState extends State<InstagramProfileUi> {
                       if (state is InstagramPostBlocError) {
                         return Text(
                           'Failed to lead post',
-                          style: TextStyle(color: const Color.fromARGB(255, 223, 9, 9)),
+                          style: TextStyle(
+                            color: const Color.fromARGB(255, 223, 9, 9),
+                          ),
                         );
                       }
                       if (state is InstagramPostBlocLoaded) {
                         print("POST LOADED");
                         print(state.posts.length);
-                        print(state.posts.first.imageVersions2?.candidates?.first.url);
+                        print(
+                          state
+                              .posts
+                              .first
+                              .imageVersions2
+                              ?.candidates
+                              ?.first
+                              .url,
+                        );
                         final posts = state.posts;
+                        print(
+                          "VIDEO URL => ${posts.first.videoVersions?.first.url}",
+                        );
                         return Expanded(
                           child: DefaultTabController(
                             length: 4,
@@ -379,34 +390,72 @@ class _InstagramProfileUiState extends State<InstagramProfileUi> {
                                             ),
                                         itemBuilder: (context, index) {
                                           final post = posts[index];
-                                          return Image.network(
-                                            post
-                                                    .imageVersions2
-                                                    ?.candidates
-                                                    ?.first
-                                                    .url ??
-                                                '',
-                                            fit: BoxFit.cover,
-                                            
-                                            errorBuilder: (
-                                              context,
-                                              error,
-                                              stackTrace,
-                                            ) {
-                                              print("IMAGE ERROR: $error");
-                                              return Container(
-                                                color: Colors.red,
-                                                child: const Icon(Icons.error),
+                                          return GestureDetector(
+                                            onTap: () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (_) => Post(),
+                                                ),
                                               );
                                             },
+                                            child: Image.network(
+                                              post
+                                                      .imageVersions2
+                                                      ?.candidates
+                                                      ?.first
+                                                      .url ??
+                                                  '',
+                                              fit: BoxFit.cover,
+
+                                              errorBuilder: (
+                                                context,
+                                                error,
+                                                stackTrace,
+                                              ) {
+                                                print("IMAGE ERROR: $error");
+                                                return Container(
+                                                  color: Colors.red,
+                                                  child: const Icon(
+                                                    Icons.error,
+                                                  ),
+                                                );
+                                              },
+                                            ),
                                           );
                                         },
                                       ),
-                                      Center(
-                                        child: Text(
-                                          'No Reels',
-                                          style: TextStyle(color: Colors.white),
-                                        ),
+                                      GridView.builder(
+                                        itemCount: posts.length,
+                                        gridDelegate:
+                                            const SliverGridDelegateWithFixedCrossAxisCount(
+                                              crossAxisCount: 3,
+                                              crossAxisSpacing: 2,
+                                              mainAxisSpacing: 2,
+                                            ),
+                                        itemBuilder: (context, index) {
+                                          final post = posts[index];
+
+                                          final videoUrl =
+                                              post.videoVersions?.isNotEmpty ==
+                                                      true
+                                                  ? post
+                                                          .videoVersions!
+                                                          .first
+                                                          .url ??
+                                                      ''
+                                                  : '';
+
+                                          if (videoUrl.isEmpty) {
+                                            return Container(
+                                              color: Colors.black,
+                                            );
+                                          }
+
+                                          return ReelGridVideo(
+                                            videoUrl: videoUrl,
+                                          );
+                                        },
                                       ),
                                       Center(
                                         child: Text(
@@ -438,6 +487,55 @@ class _InstagramProfileUiState extends State<InstagramProfileUi> {
         }
         return const SizedBox();
       },
+    );
+  }
+}
+
+class ReelGridVideo extends StatefulWidget {
+  final String videoUrl;
+
+  const ReelGridVideo({super.key, required this.videoUrl});
+
+  @override
+  State<ReelGridVideo> createState() => _ReelGridVideoState();
+}
+
+class _ReelGridVideoState extends State<ReelGridVideo> {
+  late VideoPlayerController controller;
+
+  @override
+  void initState() {
+    super.initState();
+
+    controller = VideoPlayerController.networkUrl(Uri.parse(widget.videoUrl))
+      ..initialize().then((_) {
+        setState(() {});
+        controller.setLooping(true);
+        controller.play();
+      });
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!controller.value.isInitialized) {
+      return Container(color: Colors.black);
+    }
+
+    return ClipRect(
+      child: FittedBox(
+        fit: BoxFit.cover,
+        child: SizedBox(
+          width: controller.value.size.width,
+          height: controller.value.size.height,
+          child: VideoPlayer(controller),
+        ),
+      ),
     );
   }
 }
